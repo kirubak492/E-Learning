@@ -30,7 +30,7 @@ def home(request):
 
     room_messages=Messages.objects.filter(Q(room__topic__topic__icontains=q))
 
-    context={'names':rooms,'topics':topics,'room_count':room_count,'room_messages':room_messages}
+    context={'rooms':rooms,'topics':topics,'room_count':room_count,'room_messages':room_messages}
 
 
     
@@ -49,7 +49,7 @@ def room(request,pk):
             body=request.POST.get('body')
         ) 
         return redirect('room',pk=room.id)
-    room.participants.add(request.user)
+    #room.participants.add(request.user)
     context={'room':room,'room_messages':room_messages,'participants':participants}
 
 
@@ -61,7 +61,9 @@ def createRoom(request):
     if request.method=="POST":
         form=RoomForm(request.POST)
         if form.is_valid():
-            form.save()
+            room=form.save(commit=False)
+            room.host=request.user
+            room.save()
             return redirect('home')
     context={'form':form}
     
@@ -115,7 +117,14 @@ def deleteMessage(request,pk):
     
     return render(request,'secondapp/delete.html',{'obj':message})
 
- 
+def userProfile(request,pk):
+    user=User.objects.get(id=pk)
+    rooms=user.room_set.all()
+    topics=Topic.objects.all()
+    room_messages=user.messages_set.all()
+    context={'user':user,'rooms':rooms,'topics':topics,'room_messages':room_messages}
+    return render(request,'secondapp/profile.html',context)
+
 def login_register(request):
     page='login'
     if request.user.is_authenticated:
