@@ -27,7 +27,7 @@ def home(request):
     room_count=rooms.count() 
 
     topics=Room.objects.all()
-
+    
     context={'names':rooms,'topics':topics,'room_count':room_count}
     
     return render(request,'secondapp/home.html',context)
@@ -37,7 +37,7 @@ def room(request,pk):
     room=Room.objects.get(id=pk)
     room_messages=room.messages_set.all().order_by('-created')
     participants=room.participants.all()
-    print(participants)
+    
     if request.method=='POST':
         message=Messages.objects.create(
             user=request.user,
@@ -45,7 +45,7 @@ def room(request,pk):
             body=request.POST.get('body')
         ) 
         return redirect('room',pk=room.id)
-    
+    room.participants.add(request.user)
     context={'room':room,'room_messages':room_messages,'participants':participants}
 
 
@@ -87,12 +87,31 @@ def deleteRoom(request,pk):
 
     room=Room.objects.get(id=pk)
     # print(Room.objects.all())
+
+    if request.user!=room.host:
+        return HttpResponse("You are not allowed here!!")
+    
     if request.method=='POST':
         room.delete() 
         return redirect('home')
     
     return render(request,'secondapp/delete.html',{'obj':room})
 
+@login_required(login_url='login')
+def deleteMessage(request,pk):
+
+    message=Messages.objects.get(id=pk)
+    # print(Room.objects.all())
+    if request.user!=message.user:
+        return HttpResponse("You are not allowed here!!")
+    
+    if request.method=='POST':
+        message.delete() 
+        return redirect('home')
+    
+    return render(request,'secondapp/delete.html',{'obj':message})
+
+ 
 def login_register(request):
     page='login'
     if request.user.is_authenticated:
