@@ -32,11 +32,14 @@ class Room(models.Model):
 class Messages(models.Model):
 
     user=models.ForeignKey(User,on_delete=models.CASCADE)
-    room=models.ForeignKey(Room,on_delete=models.CASCADE)#on_Delete says that if the ROom delete then all the child also deleted
+    room=models.ForeignKey(Room,on_delete=models.CASCADE)#on_Delete says that if the Room delete then all the child also deleted
     #foreign key only connect the Room with child(message)
     body=models.TextField()
     updated=models.DateTimeField(auto_now=True)#actively updated when submit
     created=models.DateTimeField(auto_now_add=True) #added once created
+
+    class Meta:
+        ordering=['-updated','-created']
 
     def __str__(self):
         return self.body[0:50]
