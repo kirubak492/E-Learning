@@ -33,8 +33,10 @@
         <div>
             {% for name in names %}
                 <div>
+                    {% if request.user  == name.host %}
                     <a href="{% url 'update-room' name.id %}"> Edit</a>
                     <a href="{% url 'delete-room' name.id%}">Delete</a>
+                    {% endif %}
                     <span>@{{name.host.username}}</span>
                     <h5> {{name.id}} ---- <a href="/room/{{name.id}}">{{name.name}}</a></h5>
                     <small>{{name.topic.topic}}</small>
